@@ -79,90 +79,12 @@ int pnt_discovery(int argc, char **argv)
     }
 
     /* Create the AF_PACKET socket. */
-    sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    sock = open_raw_sock(if_name, if_addr, &if_index, do_promiscuous, 1, 1, 1);
     if (sock < 0)
     {
-        perror("Cannot open socket");
+        //error has already been printed
         return EXIT_FAILURE;
     }
-    pnt_debug("socket open fd %p", sock);
-
-    struct ifreq ifr;
-
-    memset(&ifr, 0, sizeof(ifr));
-    strncpy(ifr.ifr_name, if_name, IFNAMSIZ - 1);
-
-    /* Get the index number and MAC address of ethernet interface. */
-    if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0)
-    {
-        perror("Cannot get interface number");
-        close(sock);
-        return EXIT_FAILURE;
-    }
-    if_index = ifr.ifr_ifindex;
-    pnt_debug("interface number is %d", if_index);
-
-    if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
-    {
-        perror("Cannot get interface address");
-        close(sock);
-        return EXIT_FAILURE;
-    }
-    memcpy(if_addr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
-    pnt_debug("interface address is %02x:%02x:%02x:%02x:%02x:%02x",
-              if_addr[0], if_addr[1], if_addr[2], if_addr[3], if_addr[4], if_addr[5]);
-
-    if (do_promiscuous)
-    {
-        /* Set interface to promiscuous mode. */
-        if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0)
-        {
-            perror("Cannot get interface flags");
-            close(sock);
-            return EXIT_FAILURE;
-        }
-        ifr.ifr_flags |= IFF_PROMISC;
-        if (ioctl(sock, SIOCSIFFLAGS, &ifr) < 0)
-        {
-            perror("Cannot set interface flags");
-            close(sock);
-            return EXIT_FAILURE;
-        }
-        pnt_debug("interface's promiscuous mode set");
-    }
-
-    // set socket to non-blocking
-    {
-        int flags;
-        flags = fcntl(sock, F_GETFL, 0);
-        if (flags < 0)
-        {
-            perror("Cannot get socket flags");
-            close(sock);
-            return EXIT_FAILURE;
-        }
-        flags |= O_NONBLOCK;
-        fcntl(sock, F_SETFL, flags);
-    }
-
-    /* Allow the socket to be reused. */
-    int s = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &s, sizeof(s)) < 0)
-    {
-        perror("Cannot set SO_REUSEADDR on socket");
-        close(sock);
-        return EXIT_FAILURE;
-    }
-    pnt_debug("SO_REUSEADDR set");
-
-    /* Bind to device. */
-    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, if_name, IFNAMSIZ - 1) < 0)
-    {
-        perror("Cannot bind to interface");
-        close(sock);
-        return EXIT_FAILURE;
-    }
-    pnt_debug("SO_BINDTODEVICE set");
 
     /* Send IdentRequest packet */
     {

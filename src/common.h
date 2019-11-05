@@ -22,6 +22,7 @@
 #include <net/ethernet.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include "version.h"
 
@@ -189,10 +190,8 @@ void pnt_debug(const char *format, ...);
 void pnt_print(const char *format, ...);
 void dump_buffer(char *buf, unsigned int length);
 
-/**
- * Creates a PN-DCP Ident Request on char.
- * Returns the lenght on written bytes
- */
+int open_raw_sock(char *if_name, uint8_t *if_addr, int *if_index,
+                  int do_promiscuous, int non_block, int reuse, int bind_device);
 int pnt_dcp_create_ident_request(char *buf, uint8_t *if_addr);
 struct pn_dcp_header *pnt_get_dcp_header(char *buf, ssize_t size, uint8_t *if_addr, uint16_t frameid);
 void pnt_parse_dcp_response_blocks(struct pn_dcp_header *pn_dcp_hdr, struct pn_dcp_identify_response_data *pn_dcp_data);
