@@ -10,11 +10,12 @@
 static void
 print_usage(const char *progname)
 {
-    fprintf(stderr, "pntools %s\n", PNT_VERSION);
+    fprintf(stderr, "pn-tools %s\n", PNT_VERSION);
     fprintf(stderr, "usage: %s <command> [options]\n\n", progname);
     fprintf(stderr, "Available commands:\n");
     fprintf(stderr, "   discovery    List all reachable devices on the network\n");
     fprintf(stderr, "   flashled     Identifies a device by flashing all its leds\n");
+    fprintf(stderr, "   version      Prints the version and exits\n");
 }
 
 int main(int argc, char **argv)
@@ -27,7 +28,12 @@ int main(int argc, char **argv)
 
     //sleep(10);
 
-    if (strcmp(argv[1], "discovery") == 0)
+    if (strcmp(argv[1], "version") == 0)
+    {
+        fprintf(stdout, "pn-tools %s\n", PNT_VERSION);
+        return EXIT_SUCCESS;
+    }
+    else if (strcmp(argv[1], "discovery") == 0)
     {
         return pnt_discovery(argc, argv);
     }

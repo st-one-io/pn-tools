@@ -8,7 +8,7 @@
 static void
 pnt_flashled_print_usage(const char *progname)
 {
-    fprintf(stderr, "pntools %s\n", PNT_VERSION);
+    fprintf(stderr, "pn-tools %s\n", PNT_VERSION);
     fprintf(stderr, "usage: %s flashled -i <iface> -t <target> [-h] [-v] [-d] [-p] [-c count] [-w <timewait>]\n\n", progname);
     fprintf(stderr, "Search for Profinet devices and print found ones on each line\n");
     fprintf(stderr, "\nOptions:\n");

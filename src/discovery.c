@@ -5,10 +5,10 @@
 
 #include "discovery.h"
 
-    static void
-    pnt_discovery_print_usage(const char *progname)
+static void
+pnt_discovery_print_usage(const char *progname)
 {
-    fprintf(stderr, "pntools %s\n", PNT_VERSION);
+    fprintf(stderr, "pn-tools %s\n", PNT_VERSION);
     fprintf(stderr, "usage: %s discovery -i <iface> [-v] [-d] [-h] [-p] [-t <timeout>]\n\n", progname);
     fprintf(stderr, "Search for Profinet devices and print found ones on each line\n\n");
     fprintf(stderr, "Options:\n");
@@ -108,7 +108,7 @@ int pnt_discovery(int argc, char **argv)
 
     if (do_headers)
     {
-        printf("Station Name\tVendor Value\tDevice Role\tVendorID\tDeviceID\tIP Address\tSubnet Mask\tGateway\tIP status\n");
+        printf("MAC Address\tStation Name\tVendor Value\tDevice Role\tVendorID\tDeviceID\tIP Address\tSubnet Mask\tGateway\tIP status\n");
     }
 
     struct timespec start, end;
@@ -134,9 +134,9 @@ int pnt_discovery(int argc, char **argv)
             }
         }
 
+        struct ether_header *eh = (struct ether_header *)buf;
         if (pnt_get_verbose_level() >= PNT_VERBOSE_DEBUG)
         {
-            struct ether_header *eh = (struct ether_header *)buf;
             fprintf(stderr, "\ndebug: recv: %02x:%02x:%02x:%02x:%02x:%02x -> %02x:%02x:%02x:%02x:%02x:%02x (%04x)",
                     eh->ether_shost[0],
                     eh->ether_shost[1],
@@ -161,7 +161,13 @@ int pnt_discovery(int argc, char **argv)
         memset(&pn_dcp_data, 0, sizeof(pn_dcp_data));
         pnt_parse_dcp_response_blocks(pn_dcp, &pn_dcp_data);
 
-        printf("%s\t%s\t%u\t%04x\t%04x\t%u.%u.%u.%u\t%u.%u.%u.%u\t%u.%u.%u.%u\t%u\n",
+        printf("%02x:%02x:%02x:%02x:%02x:%02x\t%s\t%s\t%u\t%04x\t%04x\t%u.%u.%u.%u\t%u.%u.%u.%u\t%u.%u.%u.%u\t%u\n",
+               eh->ether_shost[0],
+               eh->ether_shost[1],
+               eh->ether_shost[2],
+               eh->ether_shost[3],
+               eh->ether_shost[4],
+               eh->ether_shost[5],
                pn_dcp_data.device_stationname,
                pn_dcp_data.device_vendorvalue,
                pn_dcp_data.device_role,
