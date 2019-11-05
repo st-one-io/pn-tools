@@ -29,6 +29,7 @@
 #define BUF_SIZE (ETH_FRAME_LEN)
 
 #define PNT_DISCOVERY_XID 0x42424242
+#define PNT_FLASHLED_XID  0x24242424
 
 static char addr_broadcast[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 static char addr_broadcast_pn[ETH_ALEN] = {0x01, 0x0e, 0xcf, 0x00, 0x00, 0x00};
@@ -117,7 +118,7 @@ struct pn_dcp_header
 #define PN_DCP_BLOCK_OPTION_DEV_PROPS 2
 #define PN_DCP_BLOCK_OPTION_DHCP 3
 #define PN_DCP_BLOCK_OPTION_LLDP 4
-#define PN_DCP_BLOCK_OPTION_TRANSACTION 5
+#define PN_DCP_BLOCK_OPTION_CONTROL 5
 #define PN_DCP_BLOCK_OPTION_ALL_SELECTOR 255
 
 #define PN_DCP_BLOCK_SUBOPTION_ADDR_MAC 1
@@ -131,8 +132,11 @@ struct pn_dcp_header
 #define PN_DCP_BLOCK_SUBOPTION_DEV_PROPS_ALIAS 6
 #define PN_DCP_BLOCK_SUBOPTION_DEV_PROPS_INSTANCE 7
 
-#define PN_DCP_BLOCK_SUBOPTION_TRANSACTION_START 1
-#define PN_DCP_BLOCK_SUBOPTION_TRANSACTION_END 2
+#define PN_DCP_BLOCK_SUBOPTION_CONTROL_START_TRANS 0x01
+#define PN_DCP_BLOCK_SUBOPTION_CONTROL_END_TRANS 0x02
+#define PN_DCP_BLOCK_SUBOPTION_CONTROL_SIGNAL 0x03
+#define PN_DCP_BLOCK_SUBOPTION_CONTROL_RESPONSE 0x04
+#define PN_DCP_BLOCK_SUBOPTION_CONTROL_FACT_RESET 0x05
 
 #define PN_DCP_BLOCK_SUBOPTION_ALL_SELECTOR 255
 
@@ -175,6 +179,21 @@ struct pn_dcp_block_addr_ip
     __u8 gateway[4];
 } __attribute__((packed));
 
+struct pn_dcp_block_control_signal
+{
+    struct pn_dcp_block_header hdr;
+    __be16 block_qualifier;
+    __be16 signal_value;
+} __attribute__((packed));
+
+struct pn_dcp_block_control_response
+{
+    struct pn_dcp_block_header hdr;
+    __u8 response;
+    __u8 response_suboption;
+    __u8 error;
+} __attribute__((packed));
+
 struct pn_dcp_identify_response_data
 {
     char device_vendorvalue[64];
@@ -198,6 +217,7 @@ void dump_buffer(char *buf, unsigned int length);
 
 int open_raw_sock(char *if_name, uint8_t *if_addr, int *if_index,
                   int do_promiscuous, int non_block, int reuse, int bind_device);
+int pnt_dcp_create_flashled_request(char *buf, uint8_t *if_src, uint8_t *if_dst);
 int pnt_dcp_create_ident_request(char *buf, uint8_t *if_addr);
 struct pn_dcp_header *pnt_get_dcp_header(char *buf, ssize_t size, uint8_t *if_addr, uint16_t frameid);
 void pnt_parse_dcp_response_blocks(struct pn_dcp_header *pn_dcp_hdr, struct pn_dcp_identify_response_data *pn_dcp_data);

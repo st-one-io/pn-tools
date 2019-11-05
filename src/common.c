@@ -159,6 +159,53 @@ int open_raw_sock(char *if_name, uint8_t *if_addr, int *if_index,
     return sock;
 }
 
+int pnt_dcp_create_flashled_request(char *buf, uint8_t *if_src, uint8_t *if_dst)
+{
+    int send_len = 0;
+
+    /* Construct ehternet header. */
+    struct ether_header *eh;
+    eh = (struct ether_header *)buf;
+    memcpy(eh->ether_shost, if_src, ETH_ALEN);
+    memcpy(eh->ether_dhost, if_dst, ETH_ALEN);
+    eh->ether_type = htons(ETH_P_PROFINET);
+
+    send_len += sizeof(*eh);
+
+    /* Set PN FrameID to DCP - identify multicast*/
+    struct pn_header *pn_hdr;
+    pn_hdr = (struct pn_header *)(buf + send_len);
+    pn_hdr->h_frame_id = htons(PN_FRAME_ID_RTA_DCP_GETSET);
+
+    send_len += sizeof(*pn_hdr);
+
+    /* Create PN-DCP header */
+    struct pn_dcp_header *pn_dcp;
+    pn_dcp = (struct pn_dcp_header *)(buf + send_len);
+    pn_dcp->h_service_id = PN_DCP_SERVICE_ID_SET;
+    pn_dcp->h_service_type = PN_DCP_SERVICE_TYPE_REQUEST;
+    pn_dcp->h_xid = htonl(PNT_FLASHLED_XID);
+    pn_dcp->h_response_delay = htons(0);
+    //pn_dcp->h_dcp_data_length = htons(4);
+
+    send_len += sizeof(*pn_dcp);
+
+    struct pn_dcp_block_control_signal *pn_dcp_block;
+    pn_dcp_block = (struct pn_dcp_block_control_signal *)(buf + send_len);
+    pn_dcp_block->hdr.h_option = PN_DCP_BLOCK_OPTION_CONTROL;
+    pn_dcp_block->hdr.h_suboption = PN_DCP_BLOCK_SUBOPTION_CONTROL_SIGNAL;
+    pn_dcp_block->hdr.h_block_length = htons(4);
+    pn_dcp_block->block_qualifier = 0;
+    pn_dcp_block->signal_value = htons(0x0100); //Flash once
+
+    //set the size of the block on the header
+    pn_dcp->h_dcp_data_length = htons(sizeof(*pn_dcp_block));
+
+    send_len += sizeof(*pn_dcp_block);
+
+    return send_len;
+}
+
 int pnt_dcp_create_ident_request(char *buf, uint8_t *if_addr)
 {
     int send_len = 0;
@@ -175,7 +222,7 @@ int pnt_dcp_create_ident_request(char *buf, uint8_t *if_addr)
     /* Set PN FrameID to DCP - identify multicast*/
     struct pn_header *pn_hdr;
     pn_hdr = (struct pn_header *)(buf + send_len);
-    pn_hdr->h_frame_id = PN_FRAME_ID_RTA_DCP_REQUEST;
+    pn_hdr->h_frame_id = htons(PN_FRAME_ID_RTA_DCP_REQUEST);
 
     send_len += sizeof(*pn_hdr);
 
@@ -184,7 +231,7 @@ int pnt_dcp_create_ident_request(char *buf, uint8_t *if_addr)
     pn_dcp = (struct pn_dcp_header *)(buf + send_len);
     pn_dcp->h_service_id = PN_DCP_SERVICE_ID_IDENTIFY;
     pn_dcp->h_service_type = PN_DCP_SERVICE_TYPE_REQUEST;
-    pn_dcp->h_xid = PNT_DISCOVERY_XID;
+    pn_dcp->h_xid = htonl(PNT_DISCOVERY_XID);
     pn_dcp->h_response_delay = htons(128);
     //pn_dcp->h_dcp_data_length = htons(4);
 
