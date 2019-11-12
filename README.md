@@ -1,8 +1,10 @@
 # pn-tools
 
-A set of tools for Profinet-related tasks
+A command-line tool for Profinet-related tasks
 
-*Work in progress!*
+Supported commands:
+ - **discovery**: Discovers Profinet devices on the network
+ - **flashled**: Sends a "flash leds" request to a Profinet device
 
 ## Compiling
 
