@@ -1,3 +1,5 @@
+dir_guard=@mkdir -p $(@D)
+
 CC		:= gcc
 CFLAGS	:= -Wall -Wextra -g
 
@@ -33,5 +35,6 @@ run: all
 	./$(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
+	$(dir_guard)
 	$(CC) $(CFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
 	#sudo setcap cap_net_admin,cap_net_raw=eip ./$(BIN)/$(EXECUTABLE)
