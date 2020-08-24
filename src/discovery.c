@@ -39,7 +39,7 @@ int pnt_discovery(int argc, char **argv)
     {
         int opt;
 
-        while ((opt = getopt(argc, argv, "vdot:i:")) != -1)
+        while ((opt = getopt(argc, argv, "vdopt:i:")) != -1)
         {
             switch (opt)
             {
