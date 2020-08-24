@@ -13,6 +13,6 @@ Supported commands:
 
 ## License
 
-Copyright: (c) 2019, Smart-Tech, Guilherme Francescon Cittolin <guilherme.francescon@netsmarttech.com>
+Copyright: (c) 2019-2020, ST-One Ltda., Guilherme Francescon Cittolin <guilherme.francescon@st-one.io>
 
 GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
